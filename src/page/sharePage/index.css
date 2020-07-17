@@ -1,0 +1,69 @@
+.sharePage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0,0, 0.6);
+}
+
+.shareBottom {
+    width: 100%;
+    height: 162px;
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    background: white;
+    justify-content: space-around;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+}
+
+.shareBtn {
+    width: 100%;
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin-left: -40px;
+}
+
+.shareBtn li {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+}
+.shareBtn li span {
+    font-size: 11px;
+    margin-top: 4px;
+    color: rgba(51, 51, 51, 0.5);
+}
+
+.cover {
+    width: 50px;
+    height: 50px;
+}
+
+.cancel {
+    font-size: 13px;
+    color: rgba(51, 51, 51, 0.3);
+}
+
+.poster {
+    width: 335px;
+    height: 576px;
+    display: inherit;
+    margin: 58px auto auto;
+    border-radius: 12px;
+}
+
+.shareWraper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}

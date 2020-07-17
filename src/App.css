@@ -1,5 +1,8 @@
+/* @import '~antd/dist/antd.css'; */
+
 .App {
   text-align: center;
+  width: 100px;
 }
 
 .App-logo {
@@ -35,4 +38,27 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+
+
+.wrap {
+  display: flex;
+  /*justify-content: space-between;*/
+}
+.trapezoid2 {
+  position: relative;
+  width: 12000px;
+  border-top: 60px solid deeppink;
+  /*border-left: 40px solid transparent;*/
+  border-right: 20px solid transparent;
+}
+
+.trapezoid3 {
+  position: relative;
+  width: 60px;
+  border-top: 60px solid blue;
+  border-left: 40px solid transparent;
+  /*border-right: 40px solid transparent;*/
+  /*transform: rotate(360deg);*/
 }
