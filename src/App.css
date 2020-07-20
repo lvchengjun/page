@@ -48,9 +48,8 @@
 }
 .trapezoid2 {
   position: relative;
-  width: 12000px;
+  width: 100px;
   border-top: 60px solid deeppink;
-  /*border-left: 40px solid transparent;*/
   border-right: 20px solid transparent;
 }
 

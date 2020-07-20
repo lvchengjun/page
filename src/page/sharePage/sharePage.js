@@ -22,13 +22,14 @@ const SharePage = () => {
   const [visible,setVisible] = useState(false);
   const [plays, setPlays] = useState({});
   const [player,setPlayer] = useState({});
-  const [choiceNum, setChoice] = useState(2)
+  const [choiceNum, setChoice] = useState(4)
   const [voteNum, setShow] = useState(true); // 投票次数是否显示 两条选项
-  const [zhengChecked, setCheck] = useState(true) // 正方是否已经投票 两条选项
+  const [agreeChecked, setCheck] = useState(true) // 正方是否已经投票 两条选项
   const [fanChecked, setChecked] = useState(true) // 反方是否已经投票 两条选项
+  const [doubleNum, setDoubleNum] = useState(100) // 双向投票单方数目
   const [voteStatus, setVoteStatus] = useState(false) // 四条选项投票状态
   const [isChecked, setIsChecked] = useState(false)  // 是否被选中
-  const [isOverdue, setOverdue] = useState(true)  // 投票是否过期
+  const [isOverdue, setOverdue] = useState(false)  // 投票是否过期
   const [choicePeople, setChoicePeople] = useState([100, 200, 500, 50]) // 选项条目
 
   let handleInit;
@@ -141,10 +142,16 @@ const SharePage = () => {
     console.log(e.target.value)
     setVoteStatus(true)
     setIsChecked(true)
+    setTimeout(() => {
+      animation()
+      secAnimation()
+      thirdAnimation()
+      foreAnimation()
+    })
   }
 
-  const handleChoice = type => {
-    console.log(888)
+  // 投票(double) type: 无文章摘要  abstractType
+  const handleVote = (type, abstractType) =>{
     let data = {
       voteId: 12,
       subVoteId: 22,
@@ -156,6 +163,50 @@ const SharePage = () => {
       shareText: "this is a shareText"
     }
     callMethod('post', domain, `/api/v1/content/vote`, data).then()
+    console.log(type, abstractType)
+    if (type !== '') {
+      if (type === 'agree') {
+        console.log(type)
+        setChecked(false)
+      } else {
+        setCheck(false)
+      }
+    } else {
+      if (abstractType === 'agrees') {
+        setChecked(false)
+      } else {
+        setChecked(false)
+      }
+    }
+  }
+  const animation = () => {
+    const dom = document.querySelector('.first');
+    const style = document.styleSheets[5];
+    dom.style.animation = 'demo 5s';
+    dom.style.animationFillMode = 'forwards';
+    style.insertRule('@keyframes demo {from{width: 0px}to{width: 200px}}', 117)
+  }
+
+  const secAnimation = () => {
+    const dom = document.querySelector('.second');
+    const style = document.styleSheets[5];
+    dom.style.animation = 'demo 5s';
+    dom.style.animationFillMode = 'forwards';
+    style.insertRule('@keyframes demo {from{width: 0px}to{width: 200px}}', 117)
+  }
+  const thirdAnimation = () => {
+    const dom = document.querySelector('.third');
+    const style = document.styleSheets[5];
+    dom.style.animation = 'demo 5s';
+    dom.style.animationFillMode = 'forwards';
+    style.insertRule('@keyframes demo {from{width: 0px}to{width: 200px}}', 117)
+  }
+  const foreAnimation = () => {
+    const dom = document.querySelector('.fore');
+    const style = document.styleSheets[5];
+    dom.style.animation = 'demo 5s';
+    dom.style.animationFillMode = 'forwards';
+    style.insertRule('@keyframes demo {from{width: 0px}to{width: 200px}}', 117)
   }
 
   return (
@@ -267,8 +318,8 @@ const SharePage = () => {
                   <div className="dabuleChoice">
                     <div className="vote">
                       {
-                        zhengChecked? (
-                          <p>
+                        agreeChecked? (
+                          <p onClick={() => handleVote('agree')}>
                             <img src="https://mat1.gtimg.com/bbs/crystal/images/voteres.png" alt="zheng" />
                           </p>
                         ) : (
@@ -282,7 +333,7 @@ const SharePage = () => {
                       </p>
                       {
                         fanChecked? (
-                          <p>
+                          <p onClick={() => handleVote('unAgree')}>
                             <img src="https://mat1.gtimg.com/bbs/crystal/images/voteno.png" alt="fan" />
                           </p>
                         ) : (
@@ -294,8 +345,8 @@ const SharePage = () => {
                     </div>
                     <div className="checked">
                       <div className="voteLeft">
-                        <p className="checkedLeft" style={{width: 180}}></p>
-                        <p className="checkedRight"></p>
+                        <p className="checkedLeft" style={{width: (doubleNum/ 300) * 100 + '%'}}></p>
+                        <p className="checkedRight" style={{width: (300-doubleNum)/300 * 100 + '%'}}></p>
                       </div>
                       {
                         voteNum ? (
@@ -329,19 +380,19 @@ const SharePage = () => {
                   <div className="abstractChoice">
                     <div className="abstractVote">
                       {
-                        zhengChecked? (
-                          <p onClick={() => handleChoice('正')}>
-                            <img src="https://mat1.gtimg.com/bbs/crystal/images/voteres.png" alt="zheng" />
+                        agreeChecked? (
+                          <p onClick={() => handleVote('','agrees')}>
+                            <img src="https://mat1.gtimg.com/bbs/crystal/images/voteres.png" alt="agree" />
                           </p>
                         ) : (
                           <p style={{background: 'rgba(255, 84, 120, 0.4)'}}>
-                            <img src="https://mat1.gtimg.com/bbs/crystal/images/zheng.png" alt="zheng" />
+                            <img src="https://mat1.gtimg.com/bbs/crystal/images/zheng.png" alt="agree" />
                           </p>
                         )
                       }
                       {
                         fanChecked? (
-                          <p onClick={() => handleChoice('反')}>
+                          <p onClick={() => handleVote('','unAgrees')}>
                             <img src="https://mat1.gtimg.com/bbs/crystal/images/voteno.png" alt="fan" />
                           </p>
                         ) : (
@@ -353,8 +404,8 @@ const SharePage = () => {
                     </div>
                     <div className="checked">
                       <div className="voteAbstractLeft">
-                        <p className="checkedLeft" style={{width: 180}}></p>
-                        <p className="checkedRight"></p>
+                        <p className="checkedLeft" style={{width: (doubleNum/ 249) * 100 + '%'}}></p>
+                        <p className="checkedRight" style={{width: (249-doubleNum)/249 * 100 + '%'}}></p>
                       </div>
                       {
                         voteNum ? (
@@ -408,10 +459,10 @@ const SharePage = () => {
                             <div className="selectChoiceSuccess">
                               <p>你喜欢曲面屏手机的原因是？</p>
                               <ul>
-                                <div><li style={isChecked? {width: 180, background: 'rgb(84,85,255)', color: '#fff'}: {}}>Hangzhou<span>11</span></li></div>
-                                <div><li style={isChecked? { background: 'rgb(231,231,255)'}: {}}>Shanghai<span>88</span></li></div>
-                                <div><li style={isChecked? {width: 180, background: 'rgb(231,231,255)'}: {}}>Beijing<span>44</span></li></div>
-                                <div><li style={isChecked? {width: 180, background: 'rgb(231,231,255)'}: {}}>Chengdu<span>55</span></li></div>
+                                <div><li className="first" style={isChecked? {width: 12/220*100+'%', background: 'rgb(84,85,255)', color: '#fff'}: {}}>Hangzhou<span>32</span></li></div>
+                                <div><li className="second" style={isChecked? {background: 'rgb(231,231,255)'}: {}}>Shanghai<span>88</span></li></div>
+                                <div><li className="third" style={isChecked? {width: 45/220*100+'%', background: 'rgb(231,231,255)'}: {}}>Beijing<span>45</span></li></div>
+                                <div><li className="fore" style={isChecked? {width: 55/220*100+'%', background: 'rgb(231,231,255)'}: {}}>Chengdu<span>55</span></li></div>
                               </ul>
                             </div>
                           )

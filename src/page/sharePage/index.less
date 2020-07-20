@@ -57,7 +57,7 @@
 
     .shareContent {
         width: 335px;
-        height: 545px;
+        height: 565px;
         margin: 12px auto;
         border-radius: 15px;
         background: #fff;
@@ -315,27 +315,33 @@
                 .checked {
                     display: flex;
                     flex-flow: column;
-                    height: 12px;
+                    //height: 12px;
 
                     .voteLeft {
-                        width: 310px;
+                        width: 300px;
                         height: 12px;
                         display: flex;
                         border-radius: 10px;
                         margin-left: 16px;
-                        background: rgb(98, 132, 255);
+                        justify-content: space-between;
+                        overflow: hidden;
+                        //background: rgb(98, 132, 255);
 
                         .checkedLeft {
+                            position: relative;
+                            width: 50%;
                             height: 12px;
-                            border-radius: 10px;
-                            background: rgb(255, 84, 120);
+                            border-top: 12px solid rgb(255, 84, 120);
+                            border-right: 10px solid transparent;
                         }
 
                         .checkedRight {
-                            width: 100%;
+                            position: relative;
+                            width: 50%;
                             height: 12px;
-                            border-radius: 10px;
-                            background: rgb(98, 132, 255);
+                            border-top: 12px solid rgb(98, 132, 255);
+                            border-right: 10px solid transparent;
+                            transform: rotate(180deg);
                         }
                     }
                     .voteAbstractLeft {
@@ -537,19 +543,27 @@
                         border-radius: 10px;
                         margin-top: -25px;
                         margin-left: 42px;
-                        background: rgb(98, 132, 255);
+                        justify-content: space-between;
+                        overflow: hidden;
+                        //background: rgb(98, 132, 255);
 
                         .checkedLeft {
+                            //border-radius: 10px;
+                            //background: rgb(255, 84, 120);
+                            position: relative;
+                            width: 50%;
                             height: 12px;
-                            border-radius: 10px;
-                            background: rgb(255, 84, 120);
+                            border-top: 12px solid rgb(255, 84, 120);
+                            border-right: 10px solid transparent;
                         }
 
                         .checkedRight {
-                            width: 100%;
+                            position: relative;
+                            width: 50%;
                             height: 12px;
-                            border-radius: 10px;
-                            background: rgb(98, 132, 255);
+                            border-top: 12px solid rgb(98, 132, 255);
+                            border-right: 10px solid transparent;
+                            transform: rotate(180deg);
                         }
                     }
 
