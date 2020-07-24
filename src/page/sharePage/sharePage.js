@@ -181,32 +181,36 @@ const SharePage = () => {
   }
   const animation = () => {
     const dom = document.querySelector('.first');
+    // 投票比例
+    const pre = 50/100*100 + '%'
     const style = document.styleSheets[5];
     dom.style.animation = 'demo 5s';
     dom.style.animationFillMode = 'forwards';
-    style.insertRule('@keyframes demo {from{width: 0px}to{width: 200px}}', 117)
+    style.insertRule(`@keyframes demo {from{width: 0}to{width: ${pre}}}`, 117)
   }
 
   const secAnimation = () => {
     const dom = document.querySelector('.second');
     const style = document.styleSheets[5];
-    dom.style.animation = 'demo 5s';
+    dom.style.animation = 'second 5s';
     dom.style.animationFillMode = 'forwards';
-    style.insertRule('@keyframes demo {from{width: 0px}to{width: 200px}}', 117)
+    style.insertRule('@keyframes second {from{width: 0px}to{width: 500px}}', 118)
   }
   const thirdAnimation = () => {
+    const pre = 150/220*100+'%';
     const dom = document.querySelector('.third');
     const style = document.styleSheets[5];
-    dom.style.animation = 'demo 5s';
+    dom.style.animation = 'third 5s';
     dom.style.animationFillMode = 'forwards';
-    style.insertRule('@keyframes demo {from{width: 0px}to{width: 200px}}', 117)
+    style.insertRule(`@keyframes third {from{width: 0px}to{width: ${pre}}}`, 119)
   }
   const foreAnimation = () => {
+    const pre = 45/220*100+'%';
     const dom = document.querySelector('.fore');
     const style = document.styleSheets[5];
-    dom.style.animation = 'demo 5s';
+    dom.style.animation = 'fore 5s';
     dom.style.animationFillMode = 'forwards';
-    style.insertRule('@keyframes demo {from{width: 0px}to{width: 200px}}', 117)
+    style.insertRule(`@keyframes fore {from{width: 0px}to{width: ${pre}}}`, 120)
   }
 
   return (
