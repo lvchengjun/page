@@ -94,7 +94,7 @@ const SharePage = () => {
       },
       shareText: "this is a shareText"
     }
-    callMethod('post', domain, `/api/v1/content/detailPageNew`, data).then()
+    // callMethod('post', domain, `/api/v1/content/detailPageNew`, data).then()
     callApi('post', domain, `/v1/content/detailPage`, param).then(res => {
       if (res.status.code === 0 && res.data) {
         if (res.data.type === "video") {
