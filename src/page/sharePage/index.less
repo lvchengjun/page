@@ -7,7 +7,9 @@
     right: 0;
     bottom: 0;
     background: rgb(242, 242, 242);
-    //.share {padding-top: 100px}
+    .share {
+        height: 100%;
+    }
     .shareHead {
         width: 100%;
         height: 51px;
@@ -56,8 +58,8 @@
     }
 
     .shareContent {
-        width: 335px;
-        height: 565px;
+        width: 90%;
+        height: 80%;
         margin: 12px auto;
         border-radius: 15px;
         background: #fff;
@@ -70,16 +72,26 @@
             border-top-right-radius: 10px;
             position: relative;
             .articlePlay {
-                width: 52px;
-                height: 52px;
-                position: absolute;
-                top: 69px;
-                left: 142px;
-                z-index: 20;
+                width: 100%;
+                height: 100%;
 
-                img {
+                .videoCover {
                     width: 100%;
                     height: 100%;
+                    border-top-left-radius: 10px;
+                    border-top-right-radius: 10px;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                }
+
+                img {
+                    width: 64px;
+                    height: 64px;
+                    position: absolute;
+                    top: 69px;
+                    left: 130px;
+                    z-index: 20;
                 }
             }
             .viewCover {
@@ -125,7 +137,7 @@
                 height: 52px;
                 margin: 0 auto;
                 position: relative;
-                top: 223px;
+                top: 36vh;
                 z-index: 20;
 
                 img {
@@ -213,11 +225,11 @@
                         font-size: 14px;
                         padding-inline-start: 0;
                         display: flex;
-                        align-items: center;
+                        // align-items: center;
                         margin-left: 16px;
                         color: rgba(51, 51, 51, 0.7);
 
-                        li:nth-of-type(2) {
+                        .ongoing {
                             width: 46px;
                             height: 20px;
                             text-align: center;
@@ -226,6 +238,25 @@
                             background: rgb(231, 231, 255);
                             color: rgb(84, 85, 255);
                         }
+                        .overdue {
+                            width: 46px;
+                            height: 20px;
+                            text-align: center;
+                            font-size: 11px;
+                            margin-left: 8px;
+                            color: rgb(153,153,153);
+                            background: rgb(242,242,242)
+                        }
+
+                        // li:nth-of-type(2) {
+                        //     width: 46px;
+                        //     height: 20px;
+                        //     text-align: center;
+                        //     font-size: 11px;
+                        //     margin-left: 8px;
+                        //     background: rgb(231, 231, 255);
+                        //     color: rgb(84, 85, 255);
+                        // }
                     }
             }
             .dabuleChoice {
@@ -513,7 +544,7 @@
                 .checked {
                     display: flex;
                     flex-flow: column;
-                    height: 12px;
+                    // height: 12px;
 
                     .voteLeft {
                         width: 310px;
@@ -537,12 +568,12 @@
                         }
                     }
                     .voteAbstractLeft {
-                        width: 249px;
+                        width: 230px;
                         height: 12px;
                         display: flex;
                         border-radius: 10px;
                         margin-top: -25px;
-                        margin-left: 42px;
+                        margin-left: 51px;
                         justify-content: space-between;
                         overflow: hidden;
                         //background: rgb(98, 132, 255);
@@ -669,6 +700,9 @@
                     font-weight: 600;
                     margin-top: 19.5px;
                 }
+                .ant-radio-group {
+                    width: 100%;
+                }
 
                 .ant-radio-button-wrapper {
                     width: 100% !important;
@@ -677,9 +711,9 @@
                 }
                 .ant-radio-group-solid .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):active,
                 .ant-radio-group-solid .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
-                    width: 100% !important;
-                    background: rgb(84, 85, 255) !important;
-                    border-color: rgb(84, 85, 255) !important;
+                    // width: 100% !important;
+                    background: rgb(230, 230, 236) !important;
+                    border-color: #f9f9f9 !important;
                 }
             }
             .selectChoiceSuccess {
@@ -715,10 +749,15 @@
                         position: relative;
                         display: flex;
                         align-items: center;
-                        padding-left: 16px;
                         background: rgb(231,231,255);
 
-                        span {
+                        .first {
+                            position: absolute;
+                            left: 16px;
+                            color: rgb(102, 102, 102);
+                        }
+
+                        .voteResult {
                             position: absolute;
                             left: 263px;
                             color: rgb(102, 102, 102);
@@ -771,8 +810,8 @@
                         font-size: 14px;
                         position: relative;
                         display: flex;
-                        align-items: center;
                         padding-left: 16px;
+                        align-items: center;
 
                         span {
                             position: absolute;
@@ -853,7 +892,7 @@
             display: flex;
             align-items: center;
             position: relative;
-            margin-top: 395px;
+            margin-top: 50vh;
             background: rgba(84, 85, 255, 0.5);
             margin-left: 18px;
             border-radius: 14px;
@@ -872,8 +911,9 @@
         }
 
         .articleTitle {
-            width: 302px;
+            width: 90%;
             font-size: 22px;
+            text-align: justify;
             position: relative;
             font-weight: 550;
             margin: auto;
@@ -887,7 +927,7 @@
             font-size: 22px;
             position: relative;
             font-weight: 550;
-            margin: auto;
+            margin-left: 21px;
             line-height: 32px;
             color: rgb(255, 255, 255);
             z-index: 20;
@@ -898,11 +938,12 @@
             margin-top: 13px;
             z-index: 20;
             ul {
+                width: 90%;
                 list-style: none;
                 padding-inline-start: 0;
                 display: flex;
                 align-items: center;
-                margin-left: 16px;
+                margin: auto;
                 color: rgba(51, 51, 51, 0.7);
 
                 li:nth-of-type(2),
@@ -922,7 +963,7 @@
                 padding-inline-start: 0;
                 display: flex;
                 align-items: center;
-                margin-left: 16px;
+                margin-left: 20px;
                 color: rgb(194, 194, 194);
 
                 li:nth-of-type(2),
@@ -933,11 +974,15 @@
         }
 
         .contents {
-            width: 301px;
+            width: 90%;
             color: rgba(51, 51, 51, 0.9);
             margin: auto;
             font-size: 16px;
             line-height: 24px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 5;
         }
         .voteAbstract {
             width: 301px;

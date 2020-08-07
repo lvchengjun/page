@@ -1,0 +1,42 @@
+@import "~video-react/dist/video-react.css";
+
+.video-react .video-react-big-play-button {
+    /* font-size: 3em;
+    line-height: 2em;
+    height: 2em;
+    width: 2em;
+    margin: auto;
+    display: block;
+    position: absolute;
+    top: 40%;
+    left: 41%;
+    padding: 0;
+    cursor: pointer;
+    opacity: 1;
+    border: none;
+    border-radius: 50%; */
+    display: none;
+}
+
+.video-react.video-react-fluid {
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px !important;
+}
+
+.video-react .video-react-video {
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px !important;
+}
+
+/* .video-react .video-react-volume-menu-button-horizontal:hover .video-react-menu-content {
+    height: 9em;
+    width: 2em;
+    position: absolute;
+    top: -193px;
+    left: -76px;
+}
+
+.video-react .video-react-volume-bar.video-react-slider-horizontal {
+    width: 0.3em;
+    height: 5em;
+} */

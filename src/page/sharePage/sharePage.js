@@ -1,10 +1,10 @@
 import React, { useEffect, useState, Fragment } from 'react';
-import { callApi, callMethod, domain } from '../../util/api';
+import { callMethod, domain } from '../../util/api';
 import md5 from 'js-md5';
 // import { ShareWraper } from './Emotion'
 import './index.less';
 import { message, Radio } from 'antd';
-import { Player } from 'video-react';
+import VidoePlayer from '../posterVideo';
 
 
 /**
@@ -18,42 +18,31 @@ import { Player } from 'video-react';
 
 const SharePage = () => {
   const [article, setArticle] = useState({});
-  const [type, setType] = useState("vote");
-  const [visible,setVisible] = useState(false);
-  const [plays, setPlays] = useState({});
-  const [player,setPlayer] = useState({});
-  const [choiceNum, setChoice] = useState(4)
-  const [voteNum, setShow] = useState(true); // 投票次数是否显示 两条选项
+  const [type, setType] = useState();
+  const [visible,setVisible] = useState(false); // 小视频是否显示播放页
+  const [videoStatue,setStatus] = useState(false); // 视频是否显示播放页
+  const [choiceNum, setChoiceNum] = useState()
+  const [choice, setChoice] = useState([])
+  const [voteNum] = useState(true); // 投票次数是否显示 两条选项
   const [agreeChecked, setCheck] = useState(true) // 正方是否已经投票 两条选项
   const [fanChecked, setChecked] = useState(true) // 反方是否已经投票 两条选项
-  const [doubleNum, setDoubleNum] = useState(100) // 双向投票单方数目
   const [voteStatus, setVoteStatus] = useState(false) // 四条选项投票状态
-  const [isChecked, setIsChecked] = useState(false)  // 是否被选中
   const [isOverdue, setOverdue] = useState(false)  // 投票是否过期
-  const [choicePeople, setChoicePeople] = useState([100, 200, 500, 50]) // 选项条目
+  const [choiceCheck, setChoiceChecked] = useState() // 选中哪条(四项)
 
   let handleInit;
-  let handlePlayer;
   let getPhoneType;
+  const userId = '72e85b29c638ed33';  // 用户id
+  let voteId = "1596768605963";  // 投票id
+  let posterId = "1596768605963"; // 当前用户进入的文章id
 
   useEffect(() => {
     handleInit()
   }, [handleInit])
 
   useEffect(() => {
-    if (Object.keys(player).length !== 0) {
-      player.subscribeToStateChange(handlePlayer)
-      setTimeout(() => {
-        if (plays && plays.ended) {
-          setVisible(false)
-        }
-      }, 5000)
-    }
-  }, [plays, player, handlePlayer])
-
-  useEffect(() => {
     getPhoneType()
-  }, [getPhoneType])
+  }, [getPhoneType, isOverdue])
 
   getPhoneType = () => {
     let ua = navigator.userAgent.toLowerCase()
@@ -61,72 +50,78 @@ const SharePage = () => {
     return ua.includes('iphone') ? 'ios' : 'android'
   }
 
-  handlePlayer = (state) => {
-    if (state && state.subscribeToStateChange) {
-      setPlayer(state)
-    }
-    setPlays(state)
-  }
-
-  handleInit = () => {
-    let userId = "";
+  handleInit = async () => {
+    // let userId = "72e85b29c638ed33";
+    let voteList;
     let timestamp = Date.now().toString().substr(0, 10);
     let sign = md5(`fanya_${userId}_${timestamp}`);
-    let param = {contentId: 'c9d1db409dca443f', articleId : 'c9d1db409dca443f'};
-    param.base = {
-      DeviceModel: "",
-      IsLogin: false,
-      LoginTime: "",
-      LoginType: "",
-      appVersion: "",
-      devicePlatform: "web_share",
-      signature: sign,
-      ts: timestamp,
-      userId: userId
-    }
+
+    // 分享页所传参数 articleId:1596613962397 1596614932558 1596607964007
     let data = {
-      voteId: 12,
-      subVoteId: 22,
-      userId: "u0001",
-      articleId: "20200701A0EXCM00",
+      posterId: posterId,
       base: {
-        userId: "u0001"
-      },
-      shareText: "this is a shareText"
+          IsLogin: true,
+          LoginType: "wechat",
+          LoginTime: "2020-07-15 16: 33: 09",
+          userId: userId,
+          appVersion: "1.0.0.0",
+          devicePlatform: "android_8.0.0",
+          DeviceModel: "MI 6",
+          ts: Number(timestamp),
+          signature: sign
+      }
     }
-    // callMethod('post', domain, `/api/v1/content/detailPageNew`, data).then()
-    callApi('post', domain, `/v1/content/detailPage`, param).then(res => {
+    const d = await callMethod('post', domain, `/api/v1/content/detailPage`, data).then(res => {
       if (res.status.code === 0 && res.data) {
+        let data, allCount;
         if (res.data.type === "video") {
-          let data = res.data.video;
+          data = res.data;
           data.type = "video";
           setType('video')
           setArticle(data)
-        } else if (res.data.type === "article") {
-          let data = res.data.article;
-          data["type"] = "article";
-          // setType('article')
+        } else if (res.data.type === "news") {
+          data = res.data;
+          data["type"] = "news";
+          setType('news')
           setArticle(data)
         } else if (res.data.type === "tiny-video") {
-          let data = res.data.cover;
+          data = res.data;
           data["type"] = "tiny-video";
           setType('tiny-video')
           setArticle(data)
         } else if (res.data.type === "cover") {
-          let data = res.data.cover;
+          data = res.data;
           data["type"] = "cover";
           setType('cover')
           setArticle(data)
         } else if (res.data.type === "vote") {
-          let data = res.data.vote;
+          data = res.data;
+          let list = data.vote.voteChoice;
+          setChoice(list)
+          // 判断投票是否过期
+          if (data.vote.overdue === "") {
+            setOverdue(false)
+          } else {
+            const min = new Date(data.vote.overdue).getTime() - new Date().getTime()
+            if (min > 0) {
+              setOverdue(false)
+            } else {
+              setOverdue(true)
+            }
+          }
           data['type'] = 'vote';
           setType('vote')
           setArticle(data);
+          setChoiceNum(data.vote.choiceCount)
+          voteList = data.vote.voteChoice;
+          allCount = data.vote.voteResultCount;
+          return [voteList, allCount];
         }
       } else {
         message.error('网络存在问题，请重新进入')
       }
     })
+    return d;
   }
 
   const handleClick = () => {
@@ -134,84 +129,170 @@ const SharePage = () => {
     setVisible(true)
   }
 
+  const handleOpenVideo = () => {
+    setStatus(true)
+  }
+
   const handleOpen = () => {
     console.log(99999)
   }
 
+  // 四项投票
   const handleChange = e => {
     console.log(e.target.value)
-    setVoteStatus(true)
-    setIsChecked(true)
-    setTimeout(() => {
-      animation()
-      secAnimation()
-      thirdAnimation()
-      foreAnimation()
+    const choice = e.target.value;
+    console.log(choice, typeof(choice))
+    const timestamp = Date.now().toString().substr(0, 10);
+    const sign = md5(`fanya_${userId}_${timestamp}`);
+
+    const param = {
+      voteId: voteId,
+      choiceId: choice,
+      base: {
+          IsLogin: true,
+          LoginType: "wechat",
+          LoginTime: "2020-07-15 16: 33: 09",
+          userId: userId,
+          appVersion: "1.0.0.0",
+          devicePlatform: "android_8.0.0",
+          DeviceModel: "MI 6",
+          ts: Number(timestamp),
+          signature: sign
+      }
+    }
+    callMethod('post', domain, `/api/v1/vote`, param).then(async res => {
+      if (res.data.code === 0) {
+        const data = await handleInit()
+        console.log(data)
+        const list = data[0];
+        const count = data[1];
+        setVoteStatus(true)
+        setChoiceChecked(choice)
+        console.log(choice, 'first')
+        animation(list[1].count, count)
+        secAnimation(list[3].count, count)
+        thirdAnimation(list[0].count, count)
+        foreAnimation(list[2].count, count)
+      }
     })
   }
 
   // 投票(double) type: 无文章摘要  abstractType
   const handleVote = (type, abstractType) =>{
-    let data = {
-      voteId: 12,
-      subVoteId: 22,
-      userId: "u0001",
-      articleId: "20200701A0EXCM00",
+    console.log(type, 11, abstractType)
+    const timestamp = Date.now().toString().substr(0, 10);
+    const sign = md5(`fanya_${userId}_${timestamp}`);
+    const param = {
+      voteId: voteId,
       base: {
-        userId: "u0001"
-      },
-      shareText: "this is a shareText"
+          IsLogin: true,
+          LoginType: "wechat",
+          LoginTime: "2020-07-15 16: 33: 09",
+          userId: userId,
+          appVersion: "1.0.0.0",
+          devicePlatform: "android_8.0.0",
+          DeviceModel: "MI 6",
+          ts: Number(timestamp),
+          signature: sign
+      }
     }
-    callMethod('post', domain, `/api/v1/content/vote`, data).then()
-    console.log(type, abstractType)
     if (type !== '') {
-      if (type === 'agree') {
-        console.log(type)
-        setChecked(false)
+      console.log(9999)
+      if (type === '0') {
+        param.choiceId = type
+        callMethod('post', domain, `/api/v1/vote`, param).then(res => {
+          if (res.data && res.data.code === 0) {
+            setChecked(false)
+            setCheck(false)
+            handleInit()
+          }
+        })
       } else {
-        setCheck(false)
+        param.choiceId = type
+        callMethod('post', domain, `/api/v1/vote`, param).then(res => {
+          if (res.data && res.data.code === 0) {
+            setChecked(false)
+            setCheck(false)
+            handleInit()
+          }
+        })
       }
     } else {
-      if (abstractType === 'agrees') {
-        setChecked(false)
+      console.log(9999888888)
+      if (abstractType === '1') {
+        param.choiceId = abstractType
+        callMethod('post', domain, `/api/v1/vote`, param).then(res => {
+          if (res.data && res.data.code === 0) {
+            setChecked(false)
+            setCheck(false)
+            handleInit()
+          }
+        })
       } else {
-        setChecked(false)
+        param.choiceId = abstractType
+        callMethod('post', domain, `/api/v1/vote`, param).then(res => {
+          if (res.data && res.data.code === 0) {
+            setChecked(false)
+            setCheck(false)
+            handleInit()
+          }
+        })
       }
     }
   }
-  const animation = () => {
+  const animation = (count, result) => {
     const dom = document.querySelector('.first');
     // 投票比例
-    const pre = 50/100*100 + '%'
+    const pre = count/result*100 + '%'
     const style = document.styleSheets[5];
     dom.style.animation = 'demo 5s';
     dom.style.animationFillMode = 'forwards';
     style.insertRule(`@keyframes demo {from{width: 0}to{width: ${pre}}}`, 117)
   }
 
-  const secAnimation = () => {
+  const secAnimation = (count, result) => {
+    const pre = count/result*100 + '%'
     const dom = document.querySelector('.second');
     const style = document.styleSheets[5];
     dom.style.animation = 'second 5s';
     dom.style.animationFillMode = 'forwards';
-    style.insertRule('@keyframes second {from{width: 0px}to{width: 500px}}', 118)
+    style.insertRule(`@keyframes second {from{width: 0px}to{width: ${pre}}}`, 118)
   }
-  const thirdAnimation = () => {
-    const pre = 150/220*100+'%';
+  const thirdAnimation = (count, result) => {
+    console.log(count, 'third', result)
+    const pre = count/result*100 + '%'
     const dom = document.querySelector('.third');
     const style = document.styleSheets[5];
     dom.style.animation = 'third 5s';
     dom.style.animationFillMode = 'forwards';
     style.insertRule(`@keyframes third {from{width: 0px}to{width: ${pre}}}`, 119)
   }
-  const foreAnimation = () => {
-    const pre = 45/220*100+'%';
+  const foreAnimation = (count, result) => {
+    console.log(count, 'fore')
+    const pre = count/result*100 + '%'
+    console.log(pre)
     const dom = document.querySelector('.fore');
     const style = document.styleSheets[5];
     dom.style.animation = 'fore 5s';
     dom.style.animationFillMode = 'forwards';
     style.insertRule(`@keyframes fore {from{width: 0px}to{width: ${pre}}}`, 120)
   }
+
+  const closeVideo = (status) => {
+    console.log(status)
+    if (status) {
+      setVisible(false)
+    }
+  }
+
+  const closeArticleVideo = (status) => {
+    console.log(status)
+    if (status) {
+      setStatus(false)
+    }
+  }
+
+
 
   return (
     <div className="shareWraper">
@@ -228,34 +309,43 @@ const SharePage = () => {
         </div>
         <div className="shareContent">
           {
-            type === "video" || type === "article" ? (
+            type === "video" || type === "news" ? (
               <Fragment>
                 <div className="view">
                   {
                     type === "video" ? (
-                      <p className="articlePlay" onClick={handleClick}>
-                        <img src="https://mat1.gtimg.com/bbs/crystal/images/play.png" alt="video" />
-                      </p>
+                      <div className="articlePlay" onClick={handleOpenVideo}>
+                        {
+                          !videoStatue? (
+                            <>
+                              <img className="videoCover" src={article.poster && article.poster.cover} alt="cover" />
+                              <img src="https://mat1.gtimg.com/bbs/crystal/images/play.png" alt="video" />
+                            </>
+                          ) : (
+                            <VidoePlayer hiddenVideo={closeArticleVideo} />
+                          )
+                        }
+                      </div>
                     ) : (
                       <p className="viewCover">
-                        <img src={article.coverImage} alt="cover" />
+                        <img src={article.poster && article.poster.cover} alt="cover" />
                       </p>
                     )
                   }
                 </div>
                 <p className="remind">
                   <img src="https://mat1.gtimg.com/bbs/crystal/images/jing.png" alt="logo" />
-                  <span>{article.topic && article.topic.name}</span>
+                  <span>{article.poster && article.poster.tags}</span>
                 </p>
-                <p className="articleTitle">{article.title}</p>
+                <p className="articleTitle">{article.poster && article.poster.title}</p>
                 <div className="articleSource">
                   <ul>
-                    <li>{article.source && article.source.name}</li>
+                    <li>{article.poster && article.poster.creator}</li>
                     <li>|</li>
-                    <li>{article.updated_at}</li>
+                    <li>{article.poster && article.poster.pubtime}</li>
                   </ul>
                 </div>
-                <div className="contents">{article.abstract}</div>
+                <div className="contents">{article.poster && article.poster.abstract}</div>
               </Fragment>
             ) : null
           }
@@ -265,18 +355,12 @@ const SharePage = () => {
                 <div className="viewVideo">
                   {
                     visible ? (
-                      <Player
-                        ref={player => handlePlayer(player)}
-                        playsInline
-                        autoPlay
-                        poster="/assets/poster.png"
-                        src="https://media.w3.org/2010/05/sintel/trailer_hd.mp4"
-                      />
+                      <VidoePlayer hiddenVideo={closeVideo} />
                     ) : (
                       <>
                         <div className="mark"></div>
                         <p className="coverImage">
-                          <img src={article.coverImage} alt="cover" />
+                          <img src={article.poster && article.poster.cover} alt="cover" />
                         </p>
                         {
                           type === "tiny-video"? (
@@ -287,14 +371,14 @@ const SharePage = () => {
                         }
                         <p className="remindVideo">
                           <img src="https://mat1.gtimg.com/bbs/crystal/images/jing.png" alt="logo" />
-                          <span>{article.topic && article.topic.name}</span>
+                          <span>{article.poster && article.poster.tags}</span>
                         </p>
-                        <p className="title">{article.title}</p>
+                        <p className="title">{article.poster && article.poster.title}</p>
                         <div className="source">
                           <ul>
-                            <li>{article.source && article.source.name}</li>
+                            <li>{article.poster && article.poster.source}</li>
                             <li>|</li>
-                            <li>{article.updated_at}</li>
+                            <li>{article.poster && article.poster.pubtime}</li>
                           </ul>
                         </div>
                       </>
@@ -305,25 +389,27 @@ const SharePage = () => {
             ) : null
           }
           {
-            type === "vote" && choiceNum === 2 && article.abstract === "" ? (
+            type === "vote" && choiceNum === 2 && article.poster && article.poster.abstract === "" ? (
               <Fragment>
                 <div className="voteView">
                   <p className="remindVote">
                     <img src="https://mat1.gtimg.com/bbs/crystal/images/jing.png" alt="logo" />
-                    <span>{article.topic && article.topic.name}</span>
+                    <span>{article.poster && article.poster.tags}</span>
                   </p>
-                  <p className="voteTitle">{article.title}</p>
+                  <p className="voteTitle">{article.vote && article.vote.title}</p>
                   <div className="voteSource">
                     <ul>
-                      <li>{article.source && article.source.name}人参与</li>
-                      <li>进行中</li>
+                      <li>{article.vote && article.vote.voteResultCount}人参与</li>
+                      {
+                        isOverdue ? <li className="overdue">已结束</li> : <li className="ongoing">进行中</li>
+                      }
                     </ul>
                   </div>
                   <div className="dabuleChoice">
                     <div className="vote">
                       {
                         agreeChecked? (
-                          <p onClick={() => handleVote('agree')}>
+                          <p onClick={() => handleVote(choice[0].choiceId)}>
                             <img src="https://mat1.gtimg.com/bbs/crystal/images/voteres.png" alt="zheng" />
                           </p>
                         ) : (
@@ -337,7 +423,7 @@ const SharePage = () => {
                       </p>
                       {
                         fanChecked? (
-                          <p onClick={() => handleVote('unAgree')}>
+                          <p onClick={() => handleVote(choice[1].choiceId)}>
                             <img src="https://mat1.gtimg.com/bbs/crystal/images/voteno.png" alt="fan" />
                           </p>
                         ) : (
@@ -348,21 +434,30 @@ const SharePage = () => {
                       }
                     </div>
                     <div className="checked">
-                      <div className="voteLeft">
-                        <p className="checkedLeft" style={{width: (doubleNum/ 300) * 100 + '%'}}></p>
-                        <p className="checkedRight" style={{width: (300-doubleNum)/300 * 100 + '%'}}></p>
-                      </div>
+                      {
+                        choice && choice[0].count === 0 && choice[1].count === 0?(
+                          <div className="voteLeft">
+                            <p className="checkedLeft" style={{width: 50 + '%'}}></p>
+                            <p className="checkedRight" style={{width: 50 + '%'}}></p>
+                          </div>
+                        ) : (
+                          <div className="voteLeft">
+                            <p className="checkedLeft" style={{width: (choice[0].count/ article.vote.voteResultCount) * 100 + '%'}}></p>
+                            <p className="checkedRight" style={{width: (choice[1].count)/article.vote.voteResultCount * 100 + '%'}}></p>
+                          </div>
+                        )
+                      }
                       {
                         voteNum ? (
                           <div className="votePeople">
-                            <span className="voteNumz">1000</span>
-                            <span className="voteNumf">2000</span>
+                            <span className="voteNumz">{choice && choice[0].count}</span>
+                            <span className="voteNumf">{choice && choice[1].count}</span>
                           </div>
                         ) : null
                       }
                       <div className="voteRight" style={voteNum? {marginTop: -12} : {marginTop: 6}}>
-                        <span>静观其变</span>
-                        <span>必须买它</span>
+                        <span>{choice[0].choiceOption}</span>
+                        <span>{choice[1].choiceOption}</span>
                       </div>
                     </div>
                   </div>
@@ -371,21 +466,21 @@ const SharePage = () => {
             ) : null
           }
           {
-            type === "vote" && choiceNum === 2 && article.abstract !== ""? (
+            type === "vote" && choiceNum === 2 && article.poster && article.poster.abstract !== ""? (
                 <Fragment>
                 <div className="voteView">
                   <p className="remindVote">
                     <img src="https://mat1.gtimg.com/bbs/crystal/images/jing.png" alt="logo" />
-                    <span>{article.topic && article.topic.name}</span>
+                    <span>{article.poster && article.poster.tags}</span>
                   </p>
-                  <p className="voteTitle">{article.title}</p>
-                  <p className="voteAbstract">{article.abstract}</p>
-                  <p className="voteAbstractTitle">你的第一步触屏手机是华为吗？</p>
+                  <p className="voteTitle">{article.poster.title}</p>
+                  <p className="voteAbstract">{article.poster.abstract}</p>
+                  <p className="voteAbstractTitle">{article.vote && article.vote.title}</p>
                   <div className="abstractChoice">
                     <div className="abstractVote">
                       {
                         agreeChecked? (
-                          <p onClick={() => handleVote('','agrees')}>
+                          <p onClick={() => handleVote('',choice[0].choiceId)}>
                             <img src="https://mat1.gtimg.com/bbs/crystal/images/voteres.png" alt="agree" />
                           </p>
                         ) : (
@@ -396,7 +491,7 @@ const SharePage = () => {
                       }
                       {
                         fanChecked? (
-                          <p onClick={() => handleVote('','unAgrees')}>
+                          <p onClick={() => handleVote('',choice[1].choiceId)}>
                             <img src="https://mat1.gtimg.com/bbs/crystal/images/voteno.png" alt="fan" />
                           </p>
                         ) : (
@@ -407,28 +502,39 @@ const SharePage = () => {
                       }
                     </div>
                     <div className="checked">
-                      <div className="voteAbstractLeft">
-                        <p className="checkedLeft" style={{width: (doubleNum/ 249) * 100 + '%'}}></p>
-                        <p className="checkedRight" style={{width: (249-doubleNum)/249 * 100 + '%'}}></p>
-                      </div>
+                      {
+                        choice && choice[0].count === 0 && choice[1].count === 0?(
+                          <div className="voteAbstractLeft">
+                            <p className="checkedLeft" style={{width: 50 + '%'}}></p>
+                            <p className="checkedRight" style={{width: 50 + '%'}}></p>
+                          </div>
+                        ) : (
+                          <div className="voteAbstractLeft">
+                            <p className="checkedLeft" style={{width: (choice[0].count/ article.vote.voteResultCount) * 100 + '%'}}></p>
+                            <p className="checkedRight" style={{width: (choice[1].count/ article.vote.voteResultCount) * 100 + '%'}}></p>
+                          </div>
+                        )
+                      }
                       {
                         voteNum ? (
                           <div className="voteAbstractPeople">
-                            <span className="voteNumz">1000</span>
-                            <span className="voteNumf">2000</span>
+                            <span className="voteNumz">{choice && choice[0].count}</span>
+                            <span className="voteNumf">{choice && choice[1].count}</span>
                           </div>
                         ) : null
                       }
                       <div className="voteRight" style={voteNum? {marginTop: -12} : {marginTop: 6}}>
-                        <span>静观其变</span>
-                        <span>必须买它</span>
+                        <span>{choice[0].choiceOption}</span>
+                        <span>{choice[1].choiceOption}</span>
                       </div>
                     </div>
                   </div>
                   <div className="voteAbstractSource">
                     <ul>
-                      <li>{article.source && article.source.name}人参与</li>
-                      <li>进行中</li>
+                      <li>{article.vote && article.vote.voteResultCount}人参与</li>
+                      {
+                        isOverdue ? <li className="overdue">已结束</li> : <li className="ongoing">进行中</li>
+                      }
                     </ul>
                   </div>
                 </div>
@@ -441,7 +547,7 @@ const SharePage = () => {
                 <div className="voteChoiceView">
                   <p className="remindVote">
                     <img src="https://mat1.gtimg.com/bbs/crystal/images/jing.png" alt="logo" />
-                    <span>{article.topic && article.topic.name}</span>
+                    <span>{article.vote && article.vote.tags}</span>
                   </p>
                   <p className="voteTitle">{article.title}</p>
                   <p className="abstract">{article.abstract}</p>
@@ -451,22 +557,22 @@ const SharePage = () => {
                         {
                           !voteStatus ? (
                             <div className="selectChoice">
-                              <p>你喜欢曲面屏手机的原因是？</p>
+                              <p>{article.vote && article.vote.title}</p>
                               <Radio.Group buttonStyle="solid" onChange={handleChange}>
-                                <Radio.Button value="a">Hangzhou</Radio.Button>
-                                <Radio.Button value="b">Shanghai</Radio.Button>
-                                <Radio.Button value="c">Beijing</Radio.Button>
-                                <Radio.Button value="d">Chengdu</Radio.Button>
+                                <Radio.Button value={choice && choice[1].choiceId}>{choice && choice[1].choiceOption}</Radio.Button>
+                                <Radio.Button value={choice && choice[3].choiceId}>{choice && choice[3].choiceOption}</Radio.Button>
+                                <Radio.Button value={choice && choice[0].choiceId}>{choice && choice[0].choiceOption}</Radio.Button>
+                                <Radio.Button value={choice && choice[2].choiceId}>{choice && choice[2].choiceOption}</Radio.Button>
                               </Radio.Group>
                             </div>
                           ) : (
                             <div className="selectChoiceSuccess">
-                              <p>你喜欢曲面屏手机的原因是？</p>
+                              <p>{article.vote && article.vote.title}</p>
                               <ul>
-                                <div><li className="first" style={isChecked? {width: 12/220*100+'%', background: 'rgb(84,85,255)', color: '#fff'}: {}}>Hangzhou<span>32</span></li></div>
-                                <div><li className="second" style={isChecked? {background: 'rgb(231,231,255)'}: {}}>Shanghai<span>88</span></li></div>
-                                <div><li className="third" style={isChecked? {width: 45/220*100+'%', background: 'rgb(231,231,255)'}: {}}>Beijing<span>45</span></li></div>
-                                <div><li className="fore" style={isChecked? {width: 55/220*100+'%', background: 'rgb(231,231,255)'}: {}}>Chengdu<span>55</span></li></div>
+                                <div><li className="first" style={choiceCheck === '0'? { background: 'rgb(84,85,255)', color: '#cebfbf'}: {background: 'rgb(231,231,255)'}}><span className="first">{choice && choice[1].choiceOption}</span><span className="voteResult">{choice && choice[1].count}</span></li></div>
+                                <div><li className="second" style={choiceCheck === '1'? { background: 'rgb(84,85,255)', color: '#cebfbf'}: {background: 'rgb(231,231,255)'}}><span className="first">{choice && choice[3].choiceOption}</span><span className="voteResult">{choice && choice[3].count}</span></li></div>
+                                <div><li className="third" style={choiceCheck === '2'? { background: 'rgb(84,85,255)', color: '#cebfbf'}: {background: 'rgb(231,231,255)'}}><span className="first">{choice && choice[0].choiceOption}</span><span className="voteResult">{choice && choice[0].count}</span></li></div>
+                                <div><li className="fore" style={choiceCheck === '3'? { background: 'rgb(84,85,255)', color: '#cebfbf'}: {background: 'rgb(231,231,255)'}}><span className="first">{choice && choice[2].choiceOption}</span><span className="voteResult">{choice && choice[2].count}</span></li></div>
                               </ul>
                             </div>
                           )
@@ -474,19 +580,19 @@ const SharePage = () => {
                       </>
                     ) : (
                       <div className="selectOverdue">
-                        <p>你喜欢曲面屏手机的原因是？</p>
+                        <p>{article.vote && article.vote.title}</p>
                         <ul>
-                          <div><li style={choicePeople[0] > 0? {width: choicePeople[0], background: 'rgb(238,238,238)'}: {}}>Hangzhou<span>99</span></li></div>
-                          <div><li style={choicePeople[1] > 0? {width: choicePeople[1], background: 'rgb(238,238,238)'}: {}}>Shanghai<span>88</span></li></div>
-                          <div><li style={choicePeople[2] > 0? {width: choicePeople[2], background: 'rgb(238,238,238)'}: {}}>Beijing<span>44</span></li></div>
-                          <div><li style={choicePeople[3] > 0? {width: choicePeople[3], background: 'rgb(238,238,238)'}: {}}>Chengdu<span>55</span></li></div>
+                          <div><li  style={choice[1].count > 0 && article.vote? {width: choice[1].count/article.vote.voteResultCount*100+'%', background: 'rgb(238,238,238)'}: {}}>{choice && choice[1].choiceOption}<span>{choice && choice[1].count}</span></li></div>
+                          <div><li style={choice[3].count > 0 && article.vote ? {width: choice[3].count/article.vote.voteResultCount*100+'%', background: 'rgb(238,238,238)'}: {}}>{choice && choice[3].choiceOption}<span>{choice && choice[3].count}</span></li></div>
+                          <div><li style={choice[0].count > 0 && article.vote ? {width: choice[0].count/article.vote.voteResultCount*100+'%', background: 'rgb(238,238,238)'}: {}}>{choice && choice[0].choiceOption}<span>{choice && choice[0].count}</span></li></div>
+                          <div><li style={choice[2].count > 0 && article.vote ? {width: choice[2].count/article.vote.voteResultCount*100+'%', background: 'rgb(238,238,238)'}: {}}>{choice && choice[2].choiceOption}<span>{choice && choice[2].count}</span></li></div>
                         </ul>
                       </div>
                     )
                   }
                   <div className="voteSource">
                     <ul>
-                      <li>{article.source && article.source.name}人参与</li>
+                      <li>{article.vote && article.vote.voteResultCount}人参与</li>
                       {
                         isOverdue ? <li className="overdue">已结束</li> : <li className="ongoing">进行中</li>
                       }
